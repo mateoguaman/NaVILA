@@ -13,7 +13,7 @@ cd habitat-sim
 git submodule update --init --recursive
 python setup.py install --headless
 # modify $site_pkg_path/habitat_sim-0.1.7-py3.10-linux-x86_64.egg/habitat_sim/utils/common.py
-# L84  np.float --> np.float64
+# L84  np.float --> np.float32
 
 cd ../habitat-lab
 pip install -r requirements.txt
