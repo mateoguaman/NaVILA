@@ -25,15 +25,16 @@ git clone --branch v0.1.7 git@github.com:facebookresearch/habitat-sim.git
 cd habitat-sim
 git submodule update --init --recursive
 python setup.py install --headless
+cd ../
 python scripts/habitat_sim_autofix.py # auto fix np issue
 
-cd ../habitat-lab
+cd habitat-lab
 pip install -r requirements.txt
 pip install -r habitat_baselines/rl/requirements.txt
 pip install -r habitat_baselines/rl/ddppo/requirements.txt
 python setup.py develop --all
 
-cd ../
+cd ../ # evaluation
 pip install -r requirements.txt
 pip install gym==0.17.3 tensorflow
 
@@ -41,6 +42,7 @@ pip install gym==0.17.3 tensorflow
 pip install https://github.com/Dao-AILab/flash-attention/releases/download/v2.5.8/flash_attn-2.5.8+cu122torch2.3cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
 
 # Install VILA
+cd ../ # VILA
 pip install -e .
 pip install -e ".[train]"
 pip install -e ".[eval]"
