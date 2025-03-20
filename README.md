@@ -107,10 +107,11 @@ Examples:
 ```bash
 ./eval_out/CKPT_NAME/VLN-CE-v1/val_unseen/videos
 ```
-<p align="center">
-  <img src="assets/sample.gif" height="400">
+<p align="left">
+  <img src="assets/sample.gif" width="600">
 </p>
 4. Aggregate results and view the scores
+
 ```bash
 python scripts/eval_jsons.py ./eval_out/CKPT_NAME/VLN-CE-v1/val_unseen NUM_CHUNKS
 ```
