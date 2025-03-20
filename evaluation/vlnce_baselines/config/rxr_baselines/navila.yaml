@@ -1,6 +1,6 @@
 ---
 BASE_TASK_CONFIG_PATH: habitat_extensions/config/rxr_vlnce_english_task.yaml
-TRAINER_NAME: vila-iclr
+TRAINER_NAME: navila
 SIMULATOR_GPU_IDS: [0]
 TORCH_GPU_ID: 0
 NUM_ENVIRONMENTS: 1

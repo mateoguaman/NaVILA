@@ -1,19 +1,13 @@
 #!/bin/bash
 
-conda activate navila-release
-which python
-
 MODEL_PATH=$1
 TOTAL_CHUNKS=$2
 IDX_START=$3
+GPU_LIST=$4  # GPU list as a string (e.g., "0,2,4,6")
 
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
-gpu_list="${CUDA_VISIBLE_DEVICES:-0}"
-IFS=',' read -ra GPULIST <<< "$gpu_list"
+IFS=',' read -ra GPULIST <<< "$GPU_LIST"
 
 CHUNKS=${#GPULIST[@]}
-
-conda activate long-navila
 
 for IDX in $(seq 0 $((CHUNKS-1))); do
     CHUNK_IDX=$((IDX + IDX_START))
@@ -24,7 +18,7 @@ for IDX in $(seq 0 $((CHUNKS-1))); do
         --run-type eval \
         --num-chunks $TOTAL_CHUNKS \
         --chunk-idx $CHUNK_IDX \
-        EVAL_CKPT_PATH_DIR $1 &
+        EVAL_CKPT_PATH_DIR $MODEL_PATH &
 done
 
 wait
