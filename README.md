@@ -20,11 +20,11 @@ NaVILA is a two-level framework that combines VLAs with locomotion skills for na
 
 This repository builds on [VLN-CE](https://github.com/jacobkrantz/VLN-CE), which relies on older versions of [Habitat-Lab](https://github.com/facebookresearch/habitat-lab/tree/v0.1.7) and [Habitat-Sim](https://github.com/facebookresearch/habitat-lab/tree/v0.1.7). The installation process requires several modifications and can be complex.
 
-To set up the environment, run:
+To auto set up the environment, run:
 ```bash
 ./environment_setup_eval.sh navila-eval
 ```
-If the installation fails, check setup.sh for potential issues. The script assumes EGL is supported in your system. If it is missing, install the required packages beforehand:
+If the installation fails, check `environment_setup_eval.sh` for potential issues, particularly with `habitat-sim`. The script assumes EGL is supported in your system. If it is missing, install the required packages beforehand:
 ```bash
 sudo apt-get update || true
 sudo apt-get install -y --no-install-recommends \
@@ -58,4 +58,8 @@ data/scene_dataset
 |   ├─ ...
 ```
 ### Run
-
+First download the checkpoint from 
+To run evaluation on R2R:
+```bash
+bash scripts/eval/r2r.sh /home/anjie/Projects/NaVILA/NaVILA-Stage/checkpoints/navila-llama3-8b-stage3/ 500 0 "0"
+```
