@@ -8,10 +8,10 @@
 
 [![website](https://img.shields.io/badge/website-6DE1D2?style=for-the-badge&logo=safari&labelColor=555555)](https://navila-bot.github.io/)
 [![Arxiv](https://img.shields.io/badge/Arxiv-F75A5A?style=for-the-badge&logo=arxiv&labelColor=555555)](https://arxiv.org/abs/2412.04453)
-[![Huggingface](https://img.shields.io/badge/Huggingface-FFD63A?style=for-the-badge&logo=huggingface&labelColor=555555)](https://huggingface.co/spaces/bfshi/VILA-HD-demo)
-[![Locomotion Code](https://img.shields.io/badge/Locomotion%20Code%20-FFA955?style=for-the-badge&logo=github&labelColor=555555)](https://github.com/NVlabs/PS3)
+[![Huggingface](https://img.shields.io/badge/Huggingface-FFD63A?style=for-the-badge&logo=huggingface&labelColor=555555)](https://huggingface.co/collections/a8cheng/navila-legged-robot-vision-language-action-model-for-naviga-67cfc82b83017babdcefd4ad)
+[![Locomotion Code](https://img.shields.io/badge/Locomotion%20Code%20-FFA955?style=for-the-badge&logo=github&labelColor=555555)](https://github.com/yang-zj1026/legged-loco)
 
-
+ 
 <p align="center">
   <img src="assets/teaser.gif" width="600">
 </p>
@@ -26,13 +26,13 @@ NaVILA is a two-level framework that combines VLAs with locomotion skills for na
   <img src="assets/method.png" width="600">
 </p>
 
-## 🚀 Training
+<!-- ## 🚀 Training
 ### Installation
 To build environment for training NaVILA, please run the following:
 ```bash
 ./environment_setup.sh navila
 conda activate navila
-```
+``` -->
 
 
 ## 📊 Evaluation
@@ -109,7 +109,7 @@ data/scene_dataset
 |   ├─ ...
 ```
 ### Running Evaluation
-1. Download the checkpoint from [a8cheng/navila-llama3-8b-stage3](https://huggingface.co/a8cheng/navila-llama3-8b-stage3).
+1. Download the checkpoint from [a8cheng/navila-llama3-8b-8f](https://huggingface.co/a8cheng/navila-llama3-8b-8f).
 2. Run evaluation on R2R using:
 ```bash
 cd evaluation
