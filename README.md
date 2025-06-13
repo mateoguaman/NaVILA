@@ -1,20 +1,41 @@
+<div align="center">
+
 <p align="center">
   <img src="assets/logo.png" width="20%"/>
 </p>
 
-# NaVILA: Legged Robot Vision-Language-Action Model for Navigation
+# NaVILA: Legged Robot Vision-Language-Action Model for Navigation (RSS'25)
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/release/python-3100/)
+[![website](https://img.shields.io/badge/website-6DE1D2?style=for-the-badge&logo=safari&labelColor=555555)](https://navila-bot.github.io/)
+[![Arxiv](https://img.shields.io/badge/Arxiv-F75A5A?style=for-the-badge&logo=arxiv&labelColor=555555)](https://arxiv.org/abs/2412.04453)
+[![Huggingface](https://img.shields.io/badge/Huggingface-FFD63A?style=for-the-badge&logo=huggingface&labelColor=555555)](https://huggingface.co/spaces/bfshi/VILA-HD-demo)
+[![Locomotion Code](https://img.shields.io/badge/Locomotion%20Code%20-FFA955?style=for-the-badge&logo=github&labelColor=555555)](https://github.com/NVlabs/PS3)
 
-[Website](https://navila-bot.github.io/) / [Arxiv](https://arxiv.org/abs/2412.04453) / [Huggingface](https://huggingface.co/collections/a8cheng/navila-legged-robot-vision-language-action-model-for-naviga-67cfc82b83017babdcefd4ad)
+
+<p align="center">
+  <img src="assets/teaser.gif" width="600">
+</p>
+
+</div>
 
 ## 💡 Introduction
 
-[**NaVILA: Legged Robot Vision-Language-Action Model for Navigation**](<>)
-
 NaVILA is a two-level framework that combines VLAs with locomotion skills for navigation. It generates high-level language-based commands, while a real-time locomotion policy ensures obstacle avoidance.
 
-## Evaluation
+<p align="center">
+  <img src="assets/method.png" width="600">
+</p>
+
+## 🚀 Training
+### Installation
+To build environment for training NaVILA, please run the following:
+```bash
+./environment_setup.sh navila
+conda activate navila
+```
+
+
+## 📊 Evaluation
 
 ### Installation
 
@@ -107,11 +128,24 @@ Examples:
 ```bash
 ./eval_out/CKPT_NAME/VLN-CE-v1/val_unseen/videos
 ```
-<p align="left">
+<p align="center">
   <img src="assets/sample.gif" width="600">
 </p>
 4. Aggregate results and view the scores
 
 ```bash
 python scripts/eval_jsons.py ./eval_out/CKPT_NAME/VLN-CE-v1/val_unseen NUM_CHUNKS
+```
+
+_______________________________________________________________
+
+## 📜 Citation
+
+```bibtex
+@inproceedings{cheng2025navila,
+        title={Navila: Legged robot vision-language-action model for navigation},
+        author={Cheng, An-Chieh and Ji, Yandong and Yang, Zhaojing and Gongye, Zaitian and Zou, Xueyan and Kautz, Jan and B{\i}y{\i}k, Erdem and Yin, Hongxu and Liu, Sifei and Wang, Xiaolong},
+        booktitle={RSS},
+        year={2025}
+}
 ```

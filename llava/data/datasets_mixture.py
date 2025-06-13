@@ -54,6 +54,14 @@ def add_dataset(dataset):
 
 def register_datasets_mixtures():
 
+    llava_1_5_mm_align = Dataset(
+        dataset_name="llava_1_5_mm_align",
+        dataset_type="torch",
+        data_path="/PATH_TO_DATA/LLaVA-CC3M-Pretrain-595K/chat.json",
+        image_path="/PATH_TO_DATA/LLaVA-CC3M-Pretrain-595K/images",
+    )
+    add_dataset(llava_1_5_mm_align)
+
     video_chatgpt = Dataset(
         dataset_name="video_chatgpt",
         dataset_type="torch",
