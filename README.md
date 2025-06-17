@@ -34,6 +34,11 @@ To build environment for training NaVILA, please run the following:
 conda activate navila
 ``` -->
 
+## TODO
+- [x] Release mode/weight/evaluation.
+- [ ] Release training code. (around June 30th)
+- [ ] Release YouTube Human Touring dataset. (around June 30th)
+
 
 ## 📊 Evaluation
 
