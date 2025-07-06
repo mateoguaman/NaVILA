@@ -43,7 +43,7 @@ Optional: If you plan to use TensorBoard for logging, install `tensorboardX` via
 
 ### Dataset
 For general VQA datasets like `video_chatgpt`, `sharegpt_video`, `sharegpt4v_sft`, please follow the data preparation instructions in [NVILA](https://github.com/NVlabs/VILA).
-We provide annotations for `envdrop`, `scanqa`, `r2r`, `rxr`, and `human` on [Hugging Face](https://huggingface.co/a8cheng/NaVILA-Dataset).
+We provide annotations for `envdrop`, `scanqa`, `r2r`, `rxr`, and `human` on [Hugging Face](https://huggingface.co/datasets/a8cheng/NaVILA-Dataset).
 Please download the repo and extract the `tar.gz` files in their respective subfolders. 
 <p align="center">
 <img src="assets/human_touring.gif" width="600">
