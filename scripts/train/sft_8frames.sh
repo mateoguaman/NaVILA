@@ -1,17 +1,16 @@
 #!/bin/bash
 
-STAGE_1_PATH="./checkpoints/vila-siglip-llama3-8b-v1.5-mm-align"
 OUTPUT="./checkpoints/navila-8b-8f-sft"
 
-torchrun --nnodes=$n_node --nproc_per_node=8 --master_port=25001 \
+torchrun --nnodes=$n_node --nproc_per_node=$GPUS_PER_NODE --master_port=$MASTER_PORT \
     --master_addr $MASTER_ADDR --node_rank=$CURRENT_RANK \
     llava/train/train_mem.py \
     --longvila_sampler True \
     --deepspeed ./scripts/zero3.json \
-    --model_name_or_path $STAGE_1_PATH \
+    --model_name_or_path a8cheng/navila-siglip-llama3-8b-v1.5-pretrain \
     --version llama_3 \
     --seed 10 \
-    --data_mixture real_aug+envdrop+rxr_aug+r2r_aug+video_chatgpt+sharegpt_video+sharegpt4v_sft+scanqa \
+    --data_mixture r2r+rxr+envdrop+human+scanqa+video_chatgpt+sharegpt_video+sharegpt4v_sft \
     --vision_tower google/siglip-so400m-patch14-384 \
     --mm_vision_select_feature cls_patch \
     --mm_projector mlp_downsample \

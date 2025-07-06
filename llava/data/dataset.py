@@ -1793,8 +1793,6 @@ class LazyVideoWebDataset(Dataset):
     ):
         super().__init__()
 
-        # from llava.data.simple_video_dataset import SimpleVideoDataset
-
         from llava.data.simple_vila_webdataset import VILAWebDataset
 
         print("[DEBUG] ", osp.abspath(data_path))
@@ -2060,33 +2058,14 @@ class LazyEnvDropDataset(Dataset):
     @staticmethod
     def _load_video(video_path, num_video_frames, data_args):
         import cv2
+        from llava.mm_utils import get_frame_from_vcap_vlnce
 
-        from llava.mm_utils import (
-            get_frame_from_vcap_vlnce,
-            get_frame_from_vcap_vlnce_navila,
-            get_frame_from_vcap_vlnce_navila_v2,
-        )
-
-        video_loading_succeed = True
-        if "shortest_edge" in data_args.image_processor.size:
-            image_size = data_args.image_processor.size["shortest_edge"]
-        else:
-            image_size = data_args.image_processor.size["height"]
         try:
-            # pil_imgs = opencv_extract_frames(video_path, num_video_frames, fps, frame_count, is_nav=True)
             vidcap = cv2.VideoCapture(video_path)
-            if data_args.navila_video_sampler:
-                pil_imgs, frame_length = get_frame_from_vcap_vlnce_navila(vidcap, num_video_frames)
-            elif data_args.navila_video_sampler_v2:
-                pil_imgs, frame_length = get_frame_from_vcap_vlnce_navila_v2(vidcap, num_video_frames)
-            else:
-                pil_imgs, frame_length = get_frame_from_vcap_vlnce(vidcap, num_video_frames)
+            pil_imgs, frame_length = get_frame_from_vcap_vlnce(vidcap, num_video_frames)
 
         except Exception as e:
-            video_loading_succeed = False
-            print(f"bad data path {video_path}")
-            print(f"[DEBUG] Error processing {video_path}: {e}")
-            pil_imgs = [torch.zeros(3, image_size, image_size, dtype=torch.float32)] * num_video_frames
+            print(f"[Error] bad data path {video_path}: {e}")
             pil_imgs = [Image.new("RGB", (448, 448), (0, 0, 0))] * num_video_frames
             frame_length = 0
 
@@ -2120,35 +2099,16 @@ class LazyEnvDropDataset(Dataset):
                 video_file = sources[0]["video"]
             else:
                 video_file = sources[0]["video_id"] + ".mp4"
-            video_folder = self.image_folder
-            video_path = os.path.join(video_folder, video_file)
+
+            video_path = os.path.join(self.image_folder, video_file)
             num_video_frames = self.data_args.num_video_frames if hasattr(self.data_args, "num_video_frames") else 8
-
             images, frames_loaded = self._load_video(video_path, num_video_frames, self.data_args)
-
             image_tensor = torch.stack([process_image(image, self.data_args, None) for image in images])
 
-            if "captions" in sources[0]:
-                question = "Elaborate on the visual and narrative elements of the video in detail."
-                assert sources[0]["captions"][-1]["idx"] == "-1"
-                answer = sources[0]["captions"][-1]["content"]
-            elif "video" in sources[0]:
-                question = sources[0]["conversations"][0]["value"].rstrip()
-                if isinstance(sources[0]["conversations"][1]["value"], str):
-                    answer = sources[0]["conversations"][1]["value"].rstrip()
-                else:
-                    answer = str(sources[0]["conversations"][1]["value"]).rstrip()
-            else:
-                question = sources[0]["q"]
-                answer = sources[0]["a"]
-
+            answer = sources[0]["instruction"]
             if frames_loaded == 0:
                 answer = "Empty video."
             num_frames_loaded_successfully = len(images)
-
-            answer = re.sub(r"(?<=\.\s)([a-z])", lambda x: x.group().upper(), answer.capitalize())
-            # Remove extra spaces before punctuation
-            answer = re.sub(r"\s+\.", ".", answer)
 
             image_token = "<image>\n"
             question = f"Assume you are a robot designed for navigation. You are provided with captured images sequences {image_token * num_frames_loaded_successfully}. Based on this image sequence, please describe the navigation trajectory of the robot."
@@ -2212,8 +2172,6 @@ class LazyVLNCEDataset(Dataset):
             with open(data_path) as fp:
                 list_data_dict = [json.loads(q) for q in fp]
 
-        # rank0_print("Formatting inputs...Skip in lazy mode")
-        print("Formatting inputs...Skip in lazy mode")
         self.tokenizer = tokenizer
         self.list_data_dict = list_data_dict
         self.data_args = data_args
@@ -2240,70 +2198,45 @@ class LazyVLNCEDataset(Dataset):
         return length_list
 
     @staticmethod
-    def _load_video(video_path, num_video_frames, data_args):
-        import cv2
-
-        from llava.mm_utils import (
-            get_frame_from_vcap_vlnce,
-            get_frame_from_vcap_vlnce_navila,
-            get_frame_from_vcap_vlnce_navila_v2,
-        )
+    def _load_video(video_paths, num_video_frames, data_args):
+        from llava.mm_utils import vlnce_frame_sampling
 
         video_loading_succeed = True
-        if "shortest_edge" in data_args.image_processor.size:
-            image_size = data_args.image_processor.size["shortest_edge"]
-        else:
-            image_size = data_args.image_processor.size["height"]
         try:
-            vidcap = cv2.VideoCapture(video_path)
-            if data_args.navila_video_sampler:
-                pil_imgs, frame_length = get_frame_from_vcap_vlnce_navila(vidcap, num_video_frames)
-            elif data_args.navila_video_sampler_v2:
-                pil_imgs, frame_length = get_frame_from_vcap_vlnce_navila_v2(vidcap, num_video_frames)
-            else:
-                pil_imgs, frame_length = get_frame_from_vcap_vlnce(vidcap, num_video_frames)
+            pil_imgs = vlnce_frame_sampling(video_paths, num_video_frames)
 
         except Exception as e:
             video_loading_succeed = False
-            print(f"bad data path {video_path}")
-            print(f"[DEBUG] Error processing {video_path}: {e}")
-            pil_imgs = [torch.zeros(3, image_size, image_size, dtype=torch.float32)] * num_video_frames
+            print(f"[Error] bad data paths {video_paths}: {e}")
             pil_imgs = [Image.new("RGB", (448, 448), (0, 0, 0))] * num_video_frames
-            frame_length = 0
 
-        return pil_imgs, frame_length, video_loading_succeed
+        return pil_imgs, video_loading_succeed
 
     def __getitem__(self, i) -> Dict[str, torch.Tensor]:
         sources = self.list_data_dict[i]
         if isinstance(i, int):
             sources = [sources]
         assert len(sources) == 1, "Don't know why it is wrapped to a list"  # FIXME
-        if ("video" in sources[0]) or ("video_id" in sources[0]):
+        if ("frames" in sources[0]) and ("video_id" in sources[0]):
             num_video_frames = self.data_args.num_video_frames
-            if "video" in sources[0]:
-                video_file = sources[0]["video"]
-            else:
-                video_file = sources[0]["video_id"] + ".mp4"
+            frames = sources[0]["frames"]
             video_folder = self.image_folder
-            video_path = os.path.join(video_folder, video_file)
+            video_paths = [os.path.join(video_folder, frame) for frame in frames]
 
-            images, frame_length, video_loading_succeed = self._load_video(video_path, num_video_frames, self.data_args)
+            images, video_loading_succeed = self._load_video(video_paths, num_video_frames, self.data_args)
             num_frames_loaded_successfully = len(images)
-
             image_tensor = torch.stack([process_image(image, self.data_args, None) for image in images])
 
-            # current goes here
+            # TODO: Remove extra spaces before punctuation
             instruction = sources[0]["q"].replace("\r\n", " ").replace("\n", " ")
             instruction = re.sub(r"(?<=\.\s)([a-z])", lambda x: x.group().upper(), instruction.capitalize())
-            # Remove extra spaces before punctuation
             instruction = re.sub(r"\s+\.", ".", instruction)
-
             answer = sources[0]["a"]
 
-            interleaved_fast_tokens = "<image>\n" * (num_frames_loaded_successfully - 1)
+            image_tokens = "<image>\n" * (num_frames_loaded_successfully - 1)
             question = (
                 f"Imagine you are a robot programmed for navigation tasks. You have been given a video "
-                f'of historical observations {interleaved_fast_tokens}, and current observation <image>\n. Your assigned task is: "{instruction}" '
+                f'of historical observations {image_tokens}, and current observation <image>\n. Your assigned task is: "{instruction}" '
                 f"Analyze this series of images to decide your next action, which could be turning left or right by a specific "
                 f"degree, moving forward a certain distance, or stop if the task is completed."
             )
@@ -2318,156 +2251,7 @@ class LazyVLNCEDataset(Dataset):
 
             sources = [conversation]
         else:
-            sources = copy.deepcopy([e["conversations"] for e in sources])
-
-        data_dict = preprocess(
-            sources,
-            self.tokenizer,
-            has_image=(
-                "image" in self.list_data_dict[i]
-                or "video" in self.list_data_dict[i]
-                or "video_id" in self.list_data_dict[i]
-            ),
-        )
-        if isinstance(i, int):
-            data_dict = dict(input_ids=data_dict["input_ids"][0], labels=data_dict["labels"][0])
-
-        if ("video" in self.list_data_dict[i]) or ("video_id" in self.list_data_dict[i]):
-            data_dict["image"] = image_tensor
-            if not video_loading_succeed:
-                data_dict["labels"][:] = IGNORE_INDEX
-        else:
-            data_dict["image"] = None
-        return data_dict
-
-
-class LazyReasoningDataset(Dataset):
-    """Dataset for supervised fine-tuning."""
-
-    def __init__(
-        self,
-        data_path: str,
-        image_folder: str,
-        tokenizer: transformers.PreTrainedTokenizer,
-        data_args: DataArguments,
-        training_args: TrainingArguments,
-    ):
-        super().__init__()
-        try:
-            with open(data_path) as fp:
-                list_data_dict = json.load(fp)
-        except:
-            with open(data_path) as fp:
-                list_data_dict = [json.loads(q) for q in fp]
-
-        # rank0_print("Formatting inputs...Skip in lazy mode")
-        print("Formatting inputs...Skip in lazy mode")
-        self.tokenizer = tokenizer
-        self.list_data_dict = list_data_dict
-        self.data_args = data_args
-        self.image_folder = image_folder
-
-    def __len__(self):
-        return len(self.list_data_dict)
-
-    @property
-    def lengths(self):
-        length_list = []
-        for sample in self.list_data_dict:
-            img_tokens = 128 if "image" in sample else 0
-            length_list.append(sum(len(conv["value"].split()) for conv in sample["conversations"]) + img_tokens)
-        return length_list
-
-    @property
-    def modality_lengths(self):
-        length_list = []
-        for sample in self.list_data_dict:
-            cur_len = sum(len(conv["value"].split()) for conv in sample["conversations"])
-            cur_len = cur_len if "image" in sample else -cur_len
-            length_list.append(cur_len)
-        return length_list
-
-    @staticmethod
-    def _load_video(video_path, num_video_frames, data_args):
-        import cv2
-
-        from llava.mm_utils import (
-            get_frame_from_vcap_vlnce,
-            get_frame_from_vcap_vlnce_navila,
-            get_frame_from_vcap_vlnce_navila_v2,
-        )
-
-        video_loading_succeed = True
-        if "shortest_edge" in data_args.image_processor.size:
-            image_size = data_args.image_processor.size["shortest_edge"]
-        else:
-            image_size = data_args.image_processor.size["height"]
-        try:
-            vidcap = cv2.VideoCapture(video_path)
-            if data_args.navila_video_sampler:
-                pil_imgs, frame_length = get_frame_from_vcap_vlnce_navila(vidcap, num_video_frames)
-            elif data_args.navila_video_sampler_v2:
-                pil_imgs, frame_length = get_frame_from_vcap_vlnce_navila_v2(vidcap, num_video_frames)
-            else:
-                pil_imgs, frame_length = get_frame_from_vcap_vlnce(vidcap, num_video_frames)
-
-        except Exception as e:
-            video_loading_succeed = False
-            print(f"bad data path {video_path}")
-            print(f"[DEBUG] Error processing {video_path}: {e}")
-            pil_imgs = [torch.zeros(3, image_size, image_size, dtype=torch.float32)] * num_video_frames
-            pil_imgs = [Image.new("RGB", (448, 448), (0, 0, 0))] * num_video_frames
-            frame_length = 0
-
-        return pil_imgs, frame_length, video_loading_succeed
-
-    def __getitem__(self, i) -> Dict[str, torch.Tensor]:
-        sources = self.list_data_dict[i]
-        if isinstance(i, int):
-            sources = [sources]
-        assert len(sources) == 1, "Don't know why it is wrapped to a list"  # FIXME
-        if ("video" in sources[0]) or ("video_id" in sources[0]):
-            num_video_frames = self.data_args.num_video_frames
-            if "video" in sources[0]:
-                video_file = sources[0]["video"]
-            else:
-                video_file = sources[0]["video_id"] + ".mp4"
-            video_folder = self.image_folder
-            video_path = os.path.join(video_folder, video_file)
-
-            images, frame_length, video_loading_succeed = self._load_video(video_path, num_video_frames, self.data_args)
-            num_frames_loaded_successfully = len(images)
-
-            image_tensor = torch.stack([process_image(image, self.data_args, None) for image in images])
-
-            # current goes here
-            instruction = sources[0]["q"].replace("\r\n", " ").replace("\n", " ")
-            instruction = re.sub(r"(?<=\.\s)([a-z])", lambda x: x.group().upper(), instruction.capitalize())
-            # Remove extra spaces before punctuation
-            instruction = re.sub(r"\s+\.", ".", instruction)
-
-            answer = sources[0]["output"]
-
-            interleaved_fast_tokens = "<image>\n" * (num_frames_loaded_successfully - 1)
-            question = (
-                f"Imagine you are a robot programmed for navigation tasks. You have been given a video "
-                f'of historical observations {interleaved_fast_tokens}, and current observation <image>\n. Your assigned task is: "{instruction}" '
-                f"Think step by step regard what action would be a reasonable next step."
-                f"Your response should briefly describe your immediate environment and specify the direction or action you will take to proceed. Also mention landmarks you think you have already passed, based on the histories."
-                f"Summarize this in a concise paragraph, integrating both your observation and decision-making process. "
-            )
-
-            if not video_loading_succeed:
-                answer = "Empty video."
-
-            conversation = [
-                {"from": "human", "value": question},
-                {"from": "gpt", "value": answer},
-            ]
-
-            sources = [conversation]
-        else:
-            sources = copy.deepcopy([e["conversations"] for e in sources])
+            raise ValueError(f"Unknown data type: {sources[0]}")
 
         data_dict = preprocess(
             sources,
@@ -2864,9 +2648,9 @@ def make_supervised_data_module(
     from .builder import build_dataset
 
     train_dataset = build_dataset(data_args.data_mixture, data_args, training_args, tokenizer)
-    eval_dataset = build_dataset(data_args.eval_data_mixture, data_args, training_args, tokenizer)
+    # eval_dataset = build_dataset(data_args.eval_data_mixture, data_args, training_args, tokenizer)
     training_args.sample_lens = [len(d) for d in train_dataset.datasets]
-    training_args.eval_sample_lens = [len(d) for d in eval_dataset.datasets]
+    # training_args.eval_sample_lens = [len(d) for d in eval_dataset.datasets]
 
     PROCESS_GROUP_MANAGER = get_pg_manager()
     if PROCESS_GROUP_MANAGER is None:
@@ -2888,6 +2672,6 @@ def make_supervised_data_module(
 
     return dict(
         train_dataset=train_dataset,
-        eval_dataset=eval_dataset,
+        # eval_dataset=eval_dataset,
         data_collator=data_collator,
     )

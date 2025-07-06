@@ -13,6 +13,14 @@ from llava.utils.logging import logger
 __all__ = ["DATASETS", "register_datasets", "build_dataset"]
 
 
+def register_datasets(name: Optional[str] = None):
+    if name is None:
+        name = os.environ.get("VILA_DATASETS", "default")
+        logger.info(f"Registering datasets from `{name}`.")
+    return io.load(os.path.join(os.path.dirname(__file__), "registry", f"{name}.yaml"))
+
+DATASETS = register_datasets()
+
 class RepeatedDataset(Dataset):
     def __init__(self, dataset: Dataset, times: int) -> None:
         super().__init__()

@@ -26,18 +26,80 @@ NaVILA is a two-level framework that combines VLAs with locomotion skills for na
   <img src="assets/method.png" width="600">
 </p>
 
-<!-- ## 🚀 Training
+
+## TODO
+- [x] Release mode/weight/evaluation.
+- [x] Release training code. (around June 30th)
+- [x] Release YouTube Human Touring dataset. (around June 30th)
+
+## 🚀 Training
 ### Installation
 To build environment for training NaVILA, please run the following:
 ```bash
 ./environment_setup.sh navila
 conda activate navila
-``` -->
+```
+Optional: If you plan to use TensorBoard for logging, install `tensorboardX` via pip.
 
-## TODO
-- [x] Release mode/weight/evaluation.
-- [ ] Release training code. (around June 30th)
-- [ ] Release YouTube Human Touring dataset. (around June 30th)
+### Dataset
+For general VQA datasets like `video_chatgpt`, `sharegpt_video`, `sharegpt4v_sft`, please follow the data preparation instructions in [NVILA](https://github.com/NVlabs/VILA).
+We provide annotations for `envdrop`, `scanqa`, `r2r`, `rxr`, and `human` on [Hugging Face](https://huggingface.co/a8cheng/NaVILA-Dataset).
+Please download the repo and extract the `tar.gz` files in their respective subfolders. 
+<p align="center">
+<img src="assets/human_touring.gif" width="600">
+</p>
+
+* **YouTube Human Touring:**  
+Due to copyright restrictions, raw videos/images are not released. We provide **[video IDs](https://huggingface.co/datasets/a8cheng/NaVILA-Dataset/blob/main/Human/video_ids.txt)** and **annotations**. You can download the videos using `yt-dlp` and extract frames using: `scripts/extract_rawframes.py`
+
+* **EnvDrop:**  
+Due to the large number of videos, we provide **annotations only**. Please download the **R2R augmented split** from [R2R_VLNCE_v1-3_preprocessed.zip](https://drive.google.com/file/d/1fo8F4NKgZDH-bPSdVU3cONAkt5EW-tyr/view?usp=sharing) and render corresponding videos using [VLN-CE](https://github.com/jacobkrantz/VLN-CE).
+
+The data should have structure like:
+```graphql
+NaVILA-Dataset
+├─ EnvDrop
+|   ├─ videos
+|   |    ├─ 1.mp4
+|   |    ├─ ...
+|   ├─ annotations.json
+├─ Human
+|   ├─ raw_frames
+|   |    ├─ Aei0GpsWNys
+|   |    |    ├─ 0001.jpg
+|   |    |    ├─ ...
+|   |    ├─ ...
+|   ├─ videos
+|   |    ├─ Aei0GpsWNys.mp4
+|   |    ├─ ...
+|   ├─ annotations.json
+|   ├─ video_ids.txt
+├─ R2R
+|   ├─ train
+|   |    ├─ 1
+|   |    |    ├─ frame_0.jpg 
+|   |    |    ├─ ...
+|   |    ├─ ...
+|   ├─ annotations.json
+├─ RxR
+|   ├─ train
+|   |    ├─ 1
+|   |    |    ├─ frame_0.jpg 
+|   |    |    ├─ ...
+|   |    ├─ ...
+|   ├─ annotations.json
+├─ ScanQA
+|   ├─ videos
+|   |    ├─ scene0760_00.mp4
+|   |    ├─ ...
+|   ├─ annotations
+|   |    ├─ ScanQA_v1.0_train_reformat.json
+|   |    ├─ ...
+```
+
+
+### Training
+The pretrain model to start from is provided in [a8cheng/navila-siglip-llama3-8b-v1.5-pretrain](https://huggingface.co/a8cheng/navila-siglip-llama3-8b-v1.5-pretrain). Please modify the data paths in `llava/data/datasets_mixture.py` and use the script in `scripts/train/sft_8frames.sh` to lanuch the training. 
 
 
 ## 📊 Evaluation
@@ -106,7 +168,7 @@ data/datasets
 |   ├─ val_unseen
 |   |    ├─ val_unseen.json.gz
 |   |    ├─ ...
-data/scene_dataset
+data/scene_datasets
 ├─ mp3d
 |   ├─ 17DRP5sb8fy
 |   |    ├─ 17DRP5sb8fy.glb

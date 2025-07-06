@@ -28,117 +28,28 @@ from transformers import StoppingCriteria
 from llava.constants import IMAGE_TOKEN_INDEX
 
 
-def get_frame_from_vcap_vlnce_navila_v2(vidcap, num_frames=10, fps=None, frame_count=None):
-    fps = vidcap.get(cv2.CAP_PROP_FPS)
-    frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
-
-    if fps == 0 or frame_count == 0:
-        print("Video file not found. Returning empty images.")
-        return [Image.new("RGB", (720, 720))] * num_frames
-
-    images = []
-    count = 0
-    success = True
-    frames = []
-
-    while success:
-        success, frame = vidcap.read()
-        if success:
-            frames.append(frame)
-            count += 1
+def vlnce_frame_sampling(frames, num_frames=8):
 
     if len(frames) == 0:
         print("No frames found. Returning empty images.")
-        return [Image.new("RGB", (720, 720))] * num_frames
+        return [Image.new("RGB", (448, 448), (0, 0, 0))] * num_frames
 
-    if len(frames) <= num_frames:
-        images = [Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)) for frame in frames]
-        return images, len(frames)
-    else:
-        # only do sampling when total length > 128
-        observation_frame = frames[-1:]
-        history_frames = frames[:-1]
+    if len(frames) < num_frames:
+        while len(frames) < num_frames:
+            frames.insert(0, Image.new("RGB", (448, 448), (0, 0, 0)))
 
-        # If the video already has the desired number of frames, return them
-        if len(history_frames) == (num_frames - 1):
-            final_frames = frames
-        else:
-            # Resample history frames to fixed length using interpolation
-            indices = np.linspace(0, len(history_frames) - 1, (num_frames - 1)).astype(np.float32)
-            fixed_length_frames = []
-            # print(indices)
-
-            for i in range(num_frames - 1):
-                idx = indices[i]
-                nearest_idx = int(round(idx))
-                fixed_length_frames.append(history_frames[nearest_idx])
-
-            final_frames = fixed_length_frames + observation_frame
-
-        images = [Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)) for frame in final_frames]
-        return images, len(frames)
-
-
-def get_frame_from_vcap_vlnce_navila(vidcap, num_frames=10, fps=None, frame_count=None):
-
-    fps = vidcap.get(cv2.CAP_PROP_FPS)
-    frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
-
-    if fps == 0 or frame_count == 0:
-        print("Video file not found. Returning empty images.")
-        return [Image.new("RGB", (720, 720))] * num_frames
-
+    latest_frame = frames[-1]
+    sampled_indices = np.linspace(0, len(frames) - 1, num=num_frames - 1, endpoint=False, dtype=int)
+    sampled_frames = [frames[i] for i in sampled_indices] + [latest_frame]
+    
     images = []
-    count = 0
-    success = True
-    frames = []
-
-    while success:
-        success, frame = vidcap.read()
-        if success:
-            frames.append(frame)
-            count += 1
-
-    if len(frames) == 0:
-        print("No frames found. Returning empty images.")
-        return [Image.new("RGB", (720, 720))] * num_frames
-
-    observation_frame = frames[-1:]
-    history_frames = frames[:-1]
-
-    # If history frames is zero, use observation as history
-    if len(history_frames) == 0:
-        history_frames.append(observation_frame[0])
-
-    # If the video already has the desired number of frames, return them
-    if len(history_frames) == (num_frames - 1):
-        final_frames = frames
-    else:
-        # Resample history frames to fixed length using interpolation
-        indices = np.linspace(0, len(history_frames) - 1, (num_frames - 1)).astype(np.float32)
-        fixed_length_frames = []
-        # print(indices)
-
-        for i in range(num_frames - 1):
-            idx = indices[i]
-            """
-            # If the index is a float, we can interpolate between frames
-            if idx.is_integer():
-                fixed_length_frames.append(history_frames[int(idx)])
-            else:
-                lower_idx = int(np.floor(idx))
-                upper_idx = int(np.ceil(idx))
-                alpha = idx - lower_idx  # Interpolation factor
-                interpolated_frame = cv2.addWeighted(history_frames[lower_idx], 1 - alpha, history_frames[upper_idx], alpha, 0)
-                fixed_length_frames.append(interpolated_frame)
-            """
-            nearest_idx = int(round(idx))
-            fixed_length_frames.append(history_frames[nearest_idx])
-
-        final_frames = fixed_length_frames + observation_frame
-
-    images = [Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)) for frame in final_frames]
-    return images, len(frames)
+    for frame in sampled_frames:
+        # if frame is a path, read it
+        if isinstance(frame, str):
+            frame = Image.open(frame)
+        assert isinstance(frame, Image.Image)
+        images.append(frame.convert("RGB"))
+    return images
 
 
 def get_frame_from_vcap_vlnce(vidcap, num_frames=10, fps=None, frame_count=None):
@@ -151,7 +62,6 @@ def get_frame_from_vcap_vlnce(vidcap, num_frames=10, fps=None, frame_count=None)
         return [Image.new("RGB", (720, 720))] * num_frames
 
     images = []
-    count = 0
     success = True
     frames = []
 
@@ -159,25 +69,17 @@ def get_frame_from_vcap_vlnce(vidcap, num_frames=10, fps=None, frame_count=None)
         success, frame = vidcap.read()
         if success:
             frames.append(frame)
-            count += 1
 
     if len(frames) == 0:
         print("No frames found. Returning empty images.")
         return [Image.new("RGB", (720, 720))] * num_frames
 
     if len(frames) < num_frames:
-        # print("Padding frames:", num_frames - len(frames))
-        padding_frames = num_frames - len(frames)
         while len(frames) < num_frames:
             frames.insert(0, np.zeros_like(frames[0]))
-    else:
-        padding_frames = 0
 
     latest_frame = frames[-1]
-    # use float intervals, and then round to int
     sampled_indices = np.linspace(0, len(frames) - 1, num=num_frames - 1, endpoint=False, dtype=int)
-    # print(f"Total: {len(frames)}, Sampled: {sampled_indices}")
-
     sampled_frames = [frames[i] for i in sampled_indices] + [latest_frame]
 
     images = [Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)) for frame in sampled_frames]

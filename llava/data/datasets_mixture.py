@@ -54,14 +54,6 @@ def add_dataset(dataset):
 
 def register_datasets_mixtures():
 
-    llava_1_5_mm_align = Dataset(
-        dataset_name="llava_1_5_mm_align",
-        dataset_type="torch",
-        data_path="/PATH_TO_DATA/LLaVA-CC3M-Pretrain-595K/chat.json",
-        image_path="/PATH_TO_DATA/LLaVA-CC3M-Pretrain-595K/images",
-    )
-    add_dataset(llava_1_5_mm_align)
-
     video_chatgpt = Dataset(
         dataset_name="video_chatgpt",
         dataset_type="torch",
@@ -82,24 +74,15 @@ def register_datasets_mixtures():
         dataset_name="sharegpt4v_sft",
         dataset_type="torch",
         data_path="/PATH_TO_DATA/annotations.json",
-        image_path="/PATH_TO_DATA/images",
+        image_path="/PATH_TO_DATA/videos",
     )
     add_dataset(sharegpt4v_sft)
-
-    r2r_aug = Dataset(
-        dataset_name="r2r_aug",
-        dataset_type="vlnce",
-        data_path="/PATH_TO_DATA/R2R/v5/annotations_aug.json",
-        image_path="/PATH_TO_DATA/R2R/v5/videos",
-        description="350K VLN-CE R2R data. (augmented aith duplicate samples)",
-    )
-    add_dataset(vlnce_v5_aug)
 
     envdrop = Dataset(
         dataset_name="envdrop",
         dataset_type="envdrop",
-        data_path="/PATH_TO_DATA/R2R/envdrop/annotations.json",
-        image_path="/PATH_TO_DATA/R2R/envdrop/videos",
+        data_path="/PATH_TO_DATA/NaVILA-Dataset/EnvDrop/annotations.json",
+        image_path="/PATH_TO_DATA/NaVILA-Dataset/EnvDrop/videos",
         description="VLN_CE Envdrop.",
     )
     add_dataset(envdrop)
@@ -107,26 +90,35 @@ def register_datasets_mixtures():
     scanqa = Dataset(
         dataset_name="scanqa",
         dataset_type="torch",
-        data_path="/PATH_TO_DATA/ScanQA/annotations/ScanQA_v1.0_train_reformat.json",
-        image_path="/PATH_TO_DATA/ScanQA/videos",
+        data_path="/PATH_TO_DATA/NaVILA-Dataset/ScanQA/annotations/ScanQA_v1.0_train_reformat.json",
+        image_path="/PATH_TO_DATA/NaVILA-Dataset/ScanQA/videos",
         description="ScanQA training set.",
     )
     add_dataset(scanqa)
 
-    rxr_aug = Dataset(
-        dataset_name="rxr_aug",
+    r2r = Dataset(
+        dataset_name="r2r",
         dataset_type="vlnce",
-        data_path="/PATH_TO_DATA/RxR/v5/annotations_aug.json",
-        image_path="/PATH_TO_DATA/RxR/v5/videos",
+        data_path="/PATH_TO_DATA/NaVILA-Dataset/R2R/annotations.json",
+        image_path="/PATH_TO_DATA/NaVILA-Dataset/R2R/train",
+        description="350K VLN-CE R2R data. (augmented aith duplicate samples)",
+    )
+    add_dataset(r2r)
+
+    rxr = Dataset(
+        dataset_name="rxr",
+        dataset_type="vlnce",
+        data_path="/PATH_TO_DATA/NaVILA-Dataset/RxR/annotations.json",
+        image_path="/PATH_TO_DATA/NaVILA-Dataset/RxR/train",
         description="400K RxR data. (augmented aith duplicate stops only - 5x)",
     )
-    add_dataset(rxr_aug)
+    add_dataset(rxr)
 
-    real_aug = Dataset(
-        dataset_name="real_aug",
+    human = Dataset(
+        dataset_name="human",
         dataset_type="vlnce",
-        data_path="/PATH_TO_DATA/real/annotations_aug.json",
-        image_path="/PATH_TO_DATA/real/videos",
+        data_path="/PATH_TO_DATA/NaVILA-Dataset/Human/annotations.json",
+        image_path="/PATH_TO_DATA/NaVILA-Dataset/Human/raw_frames/",
         description="560K Real augmented, no direction is included. (augmented aith duplicate stops only - 5x)",
     )
-    add_dataset(real_aug)
+    add_dataset(human)
