@@ -31,6 +31,7 @@ NaVILA is a two-level framework that combines VLAs with locomotion skills for na
 - [x] Release mode/weight/evaluation.
 - [x] Release training code. (around June 30th)
 - [x] Release YouTube Human Touring dataset. (around June 30th)
+- [x] Release Isaac Sim evaluation, please see [here](https://github.com/yang-zj1026/NaVILA-Bench).
 
 ## 🚀 Training
 ### Installation
