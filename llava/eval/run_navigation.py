@@ -133,3 +133,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     eval_model(args)
+
+'''
+python llava/eval/run_navigation.py --model-path models/navila-llama3-8b-8f/ --video-file pics/ --query "Navigate down the trail"
+'''
