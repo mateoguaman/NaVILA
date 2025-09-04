@@ -1,3 +1,41 @@
+# Updated instructions
+
+1. Clone this repo and cd into it
+2. Create a conda env and activate it with the following commands:
+
+```bash
+./environment_setup.sh navila
+conda activate navila
+```
+3. Make two new folders:
+```bash
+mkdir -p models/navila-llama3-8b-8f
+mkdir pics
+```
+4. Download the model from huggingface:
+```bash
+huggingface-cli download a8cheng/navila-llama3-8b-8f \
+  --local-dir ./models/navila-llama3-8b-8f \
+  --local-dir-use-symlinks False \
+  --revision main
+```
+If you run into issues, you may need to login first with 
+```bash
+huggingface-cli login
+```
+5. Put some sample pictures into the pics directory. I put eight copies of the same pic of a random trail I pulled from the internet named 00000.JPG, 00001.JPG, ..., 00007.JPG, but you can name them whatever you want
+6. Try running this eval script locally to make sure the model can be loaded properly and inference works:
+```bash
+python llava/eval/run_navigation.py --model-path models/navila-llama3-8b-8f/ --video-file pics/ --query "Navigate down the trail"
+```
+7. Then, add SECRET STUFF to your .bashrc
+8. Then, test the eval server by running:
+```bash
+python llava/eval/server.py
+```
+9. On a different computer on the UW network, try running the client which is SECRET.
+10. Ask Mateo for the secret stuff.
+
 <div align="center">
 
 <p align="center">
